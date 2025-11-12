@@ -8,6 +8,10 @@ ENV PYTHONUNBUFFERED=1
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    libldap2-dev \
+    libsasl2-dev \
+    libssl-dev \
+    portaudio19-dev \
     git \
     curl \
     wget \
@@ -21,7 +25,7 @@ WORKDIR /hackgpt
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt --break-system-packages
 
 # Copy the rest of the application
 COPY . .
