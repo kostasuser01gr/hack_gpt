@@ -94,3 +94,8 @@ HackGPTApp/HackGPT.app/
 .build/
 HackGPTApp/.build/
 HackGPTApp/HackGPT.iconset/
+
+# macOS desktop build artifacts
+*.dmg
+node_modules/
+package-lock.json

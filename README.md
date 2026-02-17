@@ -722,32 +722,141 @@ Use Metasploit to check if host 10.0.0.5 is vulnerable to EternalBlue.
 
 > 📖 MCP module source: [`hackgpt_mcp/`](hackgpt_mcp/) | Standalone reference: [`mcp-kali-server/`](mcp-kali-server/)
 
-## 🖥️ Native macOS App
+## 🖥️ Native macOS Desktop App
 
-HackGPT ships as a **native Swift/SwiftUI macOS application** optimized for Apple Silicon (M4).
+HackGPT ships as a **native Swift/SwiftUI macOS application** (`.app` bundle + DMG installer) optimized for **Apple Silicon (M-series)** and macOS 13+.
 
-### Install & Launch
+### Requirements
+
+| Requirement | Minimum |
+|---|---|
+| macOS | 13 Ventura or later |
+| Architecture | Apple Silicon (arm64) — M1/M2/M3/M4 |
+| Swift | 5.9+ (included with Xcode CLT) |
+| Python | 3.9+ (Homebrew recommended) |
+| Disk | ~50 MB for .app, ~1 GB with Python dependencies |
+
+### Quick Install (DMG)
 
 ```bash
-cd HackGPTApp
-chmod +x build_and_install.sh
-./build_and_install.sh
+# Build release .app + DMG installer
+cd HackGPTApp && chmod +x desktop_build.sh
+./desktop_build.sh dist
+
+# Output: dist/HackGPT-2.1.0-arm64.dmg
+# Double-click DMG → drag HackGPT.app to /Applications
 ```
 
-Then launch from **Finder**, **Launchpad**, or **Spotlight** (Cmd+Space → "HackGPT").
+> **Gatekeeper note:** The app is unsigned. On first launch, right-click → **Open** → **Open** to bypass the Gatekeeper warning.
+
+### Build Commands
+
+| Command | Description |
+|---|---|
+| `./desktop_build.sh dev` | Debug build + launch immediately |
+| `./desktop_build.sh build` | Release build → `.app` bundle |
+| `./desktop_build.sh dist` | Release build → `.app` + `.dmg` installer |
+| `./desktop_build.sh clean` | Remove build artifacts |
+| `make dev` | Alias for `desktop_build.sh dev` |
+| `make build` | Alias for `desktop_build.sh build` |
+| `make dist` | Alias for `desktop_build.sh dist` |
+| `npm run desktop:dev` | npm wrapper for dev mode |
+| `npm run desktop:build` | npm wrapper for build |
+| `npm run desktop:dist` | npm wrapper for dist |
 
 ### Auto-Launch Services
 
-When HackGPT opens, it **automatically starts all services**:
+When HackGPT opens, it **automatically starts all backend services**:
 
 | Service | Port | Description |
 |---------|------|-------------|
 | API Backend | 8000 | REST API server |
 | MCP Kali Server | 8811 | Model Context Protocol tools |
 | Web Dashboard | 8080 | Browser-based dashboard |
-| Realtime Dashboard | 5000 | Live monitoring |
+| Realtime Dashboard | 5000 | Live monitoring + Agent Mode |
 
-All services **shut down automatically** when you quit the app.
+All services **shut down automatically** when you quit the app (SIGTERM to child processes).
+
+### Keychain-Based Secret Storage
+
+API keys are stored in the **macOS Keychain** — never in plaintext config files.
+
+- Open **Settings → API Keys** (or the sidebar **Secrets** tab) to manage keys
+- Supports: OpenAI API Key, Sentry DSN, Shodan API Key, custom tokens
+- Keys are injected as environment variables into backend services on launch
+- Protected by `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` — keys stay on your Mac
+
+The **first-run setup wizard** checks Python, project files, dependencies, and prompts for your API key.
+
+### Cost Controls
+
+Built-in spending controls (sidebar **Cost Control** tab or **Settings → Cost Control**):
+
+| Control | Default |
+|---|---|
+| Daily request limit | 100 requests |
+| Daily token budget | 500,000 tokens |
+| Daily cost cap | $5.00 USD |
+| AI kill switch | One-click disable all AI calls |
+
+Usage counters auto-reset daily. Persisted at `~/Library/Application Support/HackGPT/cost_controls.json`.
+
+### Data Management
+
+All app data lives under `~/Library/Application Support/HackGPT/`:
+
+| Subdirectory | Contents |
+|---|---|
+| `data/` | Databases, scan results |
+| `logs/` | Application logs |
+| `reports/` | Generated reports |
+| `cache/` | Temporary data |
+
+Use the sidebar **Data Management** tab to:
+- View total storage used
+- Export all data as a `.zip` archive
+- Clear cache or all data
+- Generate a diagnostic report (for bug reports)
+
+### App Structure
+
+```
+HackGPTApp/
+├── Package.swift                     # Swift Package Manager config
+├── desktop_build.sh                  # Build / dist / DMG script
+├── HackGPT.entitlements              # App sandbox & capabilities
+└── Sources/HackGPTApp/
+    ├── HackGPTApp.swift              # Main app (3,300+ lines, 11 tabs)
+    ├── KeychainManager.swift         # macOS Keychain wrapper
+    ├── CostControlManager.swift      # Spending limits & kill switch
+    ├── CostControlView.swift         # Cost control + API key UIs
+    ├── SetupAssistant.swift          # First-run wizard
+    └── DataManager.swift             # Data dir management + export
+```
+
+### Signing & Notarization (Optional)
+
+For distribution outside your own machine:
+
+```bash
+# Sign with Developer ID
+codesign --deep --force --options runtime \
+  --sign "Developer ID Application: Your Name (TEAM_ID)" \
+  HackGPTApp/HackGPT.app
+
+# Create signed DMG
+./desktop_build.sh dist
+
+# Notarize
+xcrun notarytool submit dist/HackGPT-2.1.0-arm64.dmg \
+  --apple-id you@example.com \
+  --team-id TEAM_ID \
+  --password @keychain:AC_PASSWORD \
+  --wait
+
+# Staple
+xcrun stapler staple dist/HackGPT-2.1.0-arm64.dmg
+```
 
 ### iPhone / iPad
 

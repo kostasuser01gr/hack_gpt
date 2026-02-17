@@ -1,0 +1,12 @@
+{
+  "name": "hackgpt",
+  "version": "2.1.0",
+  "private": true,
+  "description": "HackGPT Enterprise – Desktop build scripts",
+  "scripts": {
+    "desktop:dev": "cd HackGPTApp && ./desktop_build.sh dev",
+    "desktop:build": "cd HackGPTApp && ./desktop_build.sh build",
+    "desktop:dist": "cd HackGPTApp && ./desktop_build.sh dist",
+    "desktop:clean": "cd HackGPTApp && ./desktop_build.sh clean"
+  }
+}

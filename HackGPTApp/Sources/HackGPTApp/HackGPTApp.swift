@@ -15,6 +15,8 @@ struct HackGPTApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     #endif
 
+    @State private var showSetup = false
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -23,7 +25,21 @@ struct HackGPTApp: App {
                 .frame(minWidth: 960, minHeight: 640)
                 #endif
                 .onAppear {
+                    // First-run check
+                    if !UserDefaults.standard.bool(forKey: "HackGPTSetupDone") {
+                        showSetup = true
+                    }
+                    appState.loadKeychainSecrets()
                     appState.autoLaunchAllServices()
+                }
+                .sheet(isPresented: $showSetup) {
+                    UserDefaults.standard.set(true, forKey: "HackGPTSetupDone")
+                } content: {
+                    SetupAssistantView(
+                        projectRoot: appState.projectRoot(),
+                        isPresented: $showSetup
+                    )
+                    .environmentObject(appState)
                 }
         }
         #if os(macOS)
@@ -489,6 +505,24 @@ final class AppState: ObservableObject {
         refreshComponents()
     }
 
+    /// Load API keys from Keychain into the in-memory state.
+    /// Called once on app launch; keys are injected into service env vars.
+    func loadKeychainSecrets() {
+        if let key = KeychainManager.shared.get(forKey: .openAIAPIKey), !key.isEmpty {
+            openAIKey = key
+        }
+    }
+
+    /// Environment variables to inject into all child Python processes.
+    /// Includes Keychain-sourced secrets so they never touch config files.
+    func secretEnvironment() -> [String: String] {
+        var env: [String: String] = [:]
+        if !openAIKey.isEmpty {
+            env["OPENAI_API_KEY"] = openAIKey
+        }
+        return env
+    }
+
     /// Auto-launches all configured services when app opens
     func autoLaunchAllServices() {
         guard !autoLaunchCompleted else { return }
@@ -497,6 +531,7 @@ final class AppState: ObservableObject {
         #if os(macOS)
         let python = serviceManager.findPython()
         let root = projectRoot()
+        let secrets = secretEnvironment()
 
         // Verify project root exists
         guard FileManager.default.fileExists(atPath: (root as NSString).appendingPathComponent("hackgpt_v2.py")) else {
@@ -512,7 +547,8 @@ final class AppState: ObservableObject {
             name: "HackGPT API Server",
             command: python,
             args: [(root as NSString).appendingPathComponent("hackgpt_v2.py"), "--api"],
-            port: 8000
+            port: 8000,
+            env: secrets
         )
         backendRunning = true
 
@@ -524,7 +560,8 @@ final class AppState: ObservableObject {
                 name: "MCP Kali Server",
                 command: python,
                 args: [mcpScript, "--mcp"],
-                port: mcpPort
+                port: mcpPort,
+                env: secrets
             )
             mcpRunning = true
         }
@@ -536,7 +573,8 @@ final class AppState: ObservableObject {
                 name: "Web Dashboard",
                 command: python,
                 args: [(root as NSString).appendingPathComponent("hackgpt_v2.py"), "--web"],
-                port: 8080
+                port: 8080,
+                env: secrets
             )
         }
 
@@ -547,7 +585,8 @@ final class AppState: ObservableObject {
                 name: "Realtime Dashboard",
                 command: python,
                 args: [(root as NSString).appendingPathComponent("hackgpt_v2.py"), "--realtime"],
-                port: 5000
+                port: 5000,
+                env: secrets
             )
         }
 
@@ -723,6 +762,9 @@ enum SidebarItem: String, CaseIterable, Identifiable {
     case reports = "Reports"
     case tools = "Tools"
     case logs = "Logs"
+    case costControl = "Cost Control"
+    case secrets = "API Keys"
+    case dataManagement = "Data"
     case configuration = "Configuration"
 
     var id: String { rawValue }
@@ -739,6 +781,9 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .reports: return "doc.richtext"
         case .tools: return "wrench.and.screwdriver"
         case .logs: return "terminal"
+        case .costControl: return "dollarsign.circle"
+        case .secrets: return "key.fill"
+        case .dataManagement: return "externaldrive"
         case .configuration: return "gearshape"
         }
     }
@@ -797,6 +842,9 @@ struct ContentView: View {
         case .reports: ReportsView()
         case .tools: ToolsView()
         case .logs: LogsView()
+        case .costControl: CostControlView()
+        case .secrets: KeychainSettingsView()
+        case .dataManagement: DataManagementView()
         case .configuration: ConfigurationView()
         }
     }
@@ -1893,8 +1941,14 @@ struct SettingsView: View {
         TabView {
             ConfigurationView()
                 .tabItem { Label("General", systemImage: "gearshape") }
+            KeychainSettingsView()
+                .tabItem { Label("API Keys", systemImage: "key.fill") }
+            CostControlView()
+                .tabItem { Label("Cost Control", systemImage: "dollarsign.circle") }
+            DataManagementView()
+                .tabItem { Label("Data", systemImage: "externaldrive") }
         }
-        .frame(width: 600, height: 500)
+        .frame(width: 650, height: 550)
     }
 }
 
