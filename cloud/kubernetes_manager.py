@@ -4,6 +4,8 @@ Kubernetes Management for HackGPT
 Handles Kubernetes deployment, scaling, and orchestration
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import subprocess

@@ -3,6 +3,7 @@
 Optimization Module for HackGPT Enterprise
 Query optimization and resource optimization utilities
 """
+from __future__ import annotations
 
 import logging
 from dataclasses import dataclass

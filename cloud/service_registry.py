@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""
-Service Registry for HackGPT Microservices
+"""Service Registry for HackGPT Microservices
 Handles service discovery, registration, and health checking
 """
+from __future__ import annotations
 
 import hashlib
 import json

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""
-Enhanced Security and Authentication System for HackGPT
+"""Enhanced Security and Authentication System for HackGPT
 Enterprise-grade authentication, RBAC, and audit logging
 """
+from __future__ import annotations
 
 import logging
 import os

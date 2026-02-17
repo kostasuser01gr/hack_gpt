@@ -4,6 +4,8 @@ Parallel Processing Engine for HackGPT
 Handles parallel execution, task queuing, and distributed processing
 """
 
+from __future__ import annotations
+
 import logging
 import os
 import queue

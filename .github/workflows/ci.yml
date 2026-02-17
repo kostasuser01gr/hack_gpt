@@ -69,7 +69,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/ -v --tb=short --cov=. --cov-report=xml:coverage.xml || true
+        pytest tests/ -v --tb=short --cov=. --cov-report=xml:coverage.xml
 
     - name: Upload coverage
       if: matrix.python-version == '3.12'

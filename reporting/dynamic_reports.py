@@ -3,6 +3,7 @@
 Enterprise Reporting System for HackGPT
 Dynamic report generation with analytics and trend analysis
 """
+from __future__ import annotations
 
 import base64
 import json

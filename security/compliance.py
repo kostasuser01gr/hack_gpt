@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""
-Compliance Framework for HackGPT
+"""Compliance Framework for HackGPT
 Maps findings to various compliance frameworks and generates reports
 """
+from __future__ import annotations
 
 import json
 import logging
