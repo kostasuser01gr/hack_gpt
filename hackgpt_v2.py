@@ -850,6 +850,16 @@ class EnterpriseHackGPT:
         CORS(app)
         app.secret_key = config.SECRET_KEY
 
+        # Register Agent Mode blueprint
+        try:
+            from agent.api import agent_bp
+
+            app.register_blueprint(agent_bp)
+        except Exception as exc:  # noqa: BLE001
+            import logging as _logging
+
+            _logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
+
         @app.route("/api/health", methods=["GET"])
         def health_check():
             return jsonify(
@@ -1177,6 +1187,16 @@ class EnterpriseWebDashboard:
 
         app = Flask(__name__)
         CORS(app)
+
+        # Register Agent Mode blueprint
+        try:
+            from agent.api import agent_bp
+
+            app.register_blueprint(agent_bp)
+        except Exception as exc:  # noqa: BLE001
+            import logging
+
+            logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
 
         html_template = """
         <!doctype html>

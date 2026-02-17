@@ -903,7 +903,19 @@ class WebDashboard:
     def __init__(self, hackgpt_instance: HackGPT) -> None:
         self.app = Flask(__name__)
         self.hackgpt = hackgpt_instance
+        self._register_agent_blueprint()
         self.setup_routes()
+
+    def _register_agent_blueprint(self) -> None:
+        """Register the Agent Mode API blueprint."""
+        try:
+            from agent.api import agent_bp
+
+            self.app.register_blueprint(agent_bp)
+        except Exception as exc:  # noqa: BLE001
+            import logging
+
+            logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
 
     def setup_routes(self) -> None:
         """Setup Flask routes."""
@@ -911,6 +923,10 @@ class WebDashboard:
         @self.app.route("/")
         def index():
             return render_template("dashboard.html")
+
+        @self.app.route("/agent")
+        def agent_chat():
+            return render_template("agent_chat.html")
 
         @self.app.route("/api/status")
         def status():

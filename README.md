@@ -708,6 +708,114 @@ cd HackGPTApp && xcodegen generate && open HackGPT.xcodeproj
 
 See [HackGPTApp/IOS_SETUP.md](HackGPTApp/IOS_SETUP.md) for full iOS deployment guide.
 
+## 🤖 Agent Mode (ChatGPT-like Interface)
+
+HackGPT includes a built-in **Agent Mode** — a ChatGPT-like conversational interface powered by the OpenAI Responses API with tool-calling capabilities.
+
+### Features
+
+| Capability | Description |
+|---|---|
+| **Tool Calling** | Web search, code interpreter, file search, image generation — all via OpenAI built-in tools |
+| **Streaming** | SSE-based real-time token streaming for responsive chat |
+| **Conversation Memory** | Persistent conversations with pin, archive, and history |
+| **Project Workspaces** | Per-project vector stores for RAG-powered file search |
+| **Usage Metering** | Per-user rate limiting, token budgets, and cost tracking |
+| **ChatGPT-like UI** | Full single-page chat interface at `/agent` |
+
+### Quick Start
+
+1. **Set your OpenAI API key** in `.env`:
+
+```bash
+cp .env.example .env
+# Edit .env and set:
+OPENAI_API_KEY=sk-...
+AGENT_ENABLE_WEB_SEARCH=true
+AGENT_ENABLE_CODE_INTERPRETER=true
+```
+
+2. **Access the Agent UI** at `http://localhost:5000/agent` when running the Flask app.
+
+3. **Or use the REST API** directly:
+
+```bash
+# Chat (blocking)
+curl -X POST http://localhost:5000/api/agent/chat \
+  -H "Content-Type: application/json" \
+  -H "X-User-ID: user1" \
+  -d '{"message": "Scan example.com for open ports"}'
+
+# Chat (streaming via SSE)
+curl -N -X POST http://localhost:5000/api/agent/chat/stream \
+  -H "Content-Type: application/json" \
+  -H "X-User-ID: user1" \
+  -d '{"message": "Explain SQL injection", "tool_overrides": {"web_search": true}}'
+
+# List conversations
+curl http://localhost:5000/api/agent/conversations -H "X-User-ID: user1"
+
+# Create a workspace with file search
+curl -X POST http://localhost:5000/api/agent/workspaces \
+  -H "Content-Type: application/json" \
+  -H "X-User-ID: user1" \
+  -d '{"name": "pentest-acme"}'
+
+# Check usage & rate limits
+curl http://localhost:5000/api/agent/usage -H "X-User-ID: user1"
+```
+
+### Configuration (Environment Variables)
+
+| Variable | Default | Description |
+|---|---|---|
+| `OPENAI_API_KEY` | — | Required. Your OpenAI API key |
+| `AGENT_MODEL` | `gpt-4o` | Default model for chat |
+| `AGENT_ENABLE_WEB_SEARCH` | `false` | Enable web search tool |
+| `AGENT_ENABLE_CODE_INTERPRETER` | `false` | Enable code interpreter |
+| `AGENT_ENABLE_FILE_SEARCH` | `false` | Enable file search (RAG) |
+| `AGENT_ENABLE_IMAGE_GENERATION` | `false` | Enable image generation |
+| `AGENT_RATE_LIMIT_RPM` | `20` | Max requests per minute per user |
+| `AGENT_RATE_LIMIT_RPD` | `500` | Max requests per day per user |
+| `AGENT_MAX_TOKENS_REQUEST` | `16384` | Max tokens per single request |
+| `AGENT_MAX_TOKENS_DAY` | `500000` | Daily token budget per user |
+| `AGENT_MAX_IMAGES_DAY` | `20` | Max image generations per day |
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/agent/health` | Health check & feature flags |
+| `POST` | `/api/agent/chat` | Send message (blocking response) |
+| `POST` | `/api/agent/chat/stream` | Send message (SSE streaming) |
+| `GET` | `/api/agent/conversations` | List user conversations |
+| `GET` | `/api/agent/conversations/:id` | Get conversation details |
+| `DELETE` | `/api/agent/conversations/:id` | Delete conversation |
+| `POST` | `/api/agent/conversations/:id/pin` | Pin/unpin conversation |
+| `POST` | `/api/agent/conversations/:id/archive` | Archive/unarchive |
+| `GET` | `/api/agent/workspaces` | List user workspaces |
+| `POST` | `/api/agent/workspaces` | Create workspace |
+| `DELETE` | `/api/agent/workspaces/:id` | Delete workspace |
+| `POST` | `/api/agent/workspaces/:id/files` | Upload file to workspace |
+| `GET` | `/api/agent/workspaces/:id/files` | List workspace files |
+| `DELETE` | `/api/agent/workspaces/:id/files/:fid` | Delete file |
+| `GET` | `/api/agent/usage` | Usage stats & limits |
+
+### Architecture
+
+```
+agent/
+├── config.py          # AgentConfig & AgentLimits dataclasses
+├── schemas.py         # Message, Conversation, Workspace, UsageRecord models
+├── openai_client.py   # OpenAI Responses API wrapper
+├── metering.py        # Per-user rate limiting & token budgets
+├── orchestrator.py    # Multi-turn agent loop with tool dispatch
+├── vector_store.py    # Workspace-scoped vector stores for RAG
+├── api.py             # Flask Blueprint with 15 REST endpoints
+└── tools/
+    └── __init__.py    # Tool registry (web search, code interpreter, etc.)
+```
+
 ## 🛡️ Quality Gates & Autofix
 
 ### TL;DR — Automated Safety Net
