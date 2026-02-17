@@ -860,6 +860,16 @@ class EnterpriseHackGPT:
 
             _logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
 
+        # Register Inventory blueprint
+        try:
+            from inventory.api import inventory_bp
+
+            app.register_blueprint(inventory_bp)
+        except Exception as exc:
+            import logging as _logging
+
+            _logging.getLogger(__name__).warning("Inventory module unavailable: %s", exc)
+
         @app.route("/api/health", methods=["GET"])
         def health_check():
             return jsonify(
@@ -1197,6 +1207,16 @@ class EnterpriseWebDashboard:
             import logging
 
             logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
+
+        # Register Inventory blueprint
+        try:
+            from inventory.api import inventory_bp
+
+            app.register_blueprint(inventory_bp)
+        except Exception as exc:
+            import logging
+
+            logging.getLogger(__name__).warning("Inventory module unavailable: %s", exc)
 
         html_template = """
         <!doctype html>

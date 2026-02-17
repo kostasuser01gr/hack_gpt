@@ -61,6 +61,58 @@
 - **Executive Summaries**: AI-generated business impact assessments
 - **Compliance Reports**: Framework-specific compliance documentation
 
+### 📡 Device Inventory & Network Ops
+
+A **read-only, authorized-networks-only** device inventory module for tracking
+and auditing devices on networks you own or have written permission to monitor.
+
+- **Manual Import**: CSV / JSON file upload (UniFi, MikroTik, generic formats)
+- **Privacy by Default**: MAC & IP masking (HMAC-SHA256 device keys); admin-only reveal with reason + audit
+- **Diff Engine**: Automatic new-device detection, dedup alerts, observation timeline
+- **Policy & Risk Engine**: Configurable risk scoring (0-100), odd-hours alerts, long-absent detection
+- **Maintenance Windows**: Suppress alerts during planned changes
+- **~25 REST Endpoints**: Networks CRUD, import, devices (list/approve/reveal), alerts (ack/resolve), policies, KPI reports, CSV export
+- **RBAC**: Admin-only for network creation, import, reveal, policies; viewer-safe read endpoints
+- **Full Audit Trail**: Every sensitive action logged with actor, IP, user-agent
+
+> **Safety constraints**: NO active scanning. NO packet capture. Authorized networks only. Explicit consent required before any network is registered.
+
+#### Environment Variables
+
+```bash
+INVENTORY_HMAC_SECRET=your-hmac-secret      # Device key HMAC secret (falls back to SECRET_KEY)
+INVENTORY_ENABLE_ROUTER_ADAPTERS=false       # Official router API adapters (future)
+INVENTORY_ENABLE_ENFORCEMENT=false           # Block/quarantine actions (future)
+INVENTORY_ENABLE_AI_TOOLS=false              # AI-assisted triage (future)
+INVENTORY_RETENTION_DAYS=90                  # Observation retention period
+INVENTORY_ODD_HOURS_START=22                 # Odd-hours window start (0-23)
+INVENTORY_ODD_HOURS_END=6                    # Odd-hours window end (0-23)
+```
+
+#### Quick API Usage
+
+```bash
+# Health check
+curl http://localhost:5000/api/inventory/health
+
+# Register an authorized network (admin, consent required)
+curl -X POST http://localhost:5000/api/inventory/networks \
+  -H "X-User-Role: admin" -H "X-User-ID: admin1" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Office LAN","consent_confirmed":true}'
+
+# Import devices from CSV
+curl -X POST http://localhost:5000/api/inventory/networks/<NET_ID>/import \
+  -H "X-User-Role: admin" -H "X-User-ID: admin1" \
+  -F "file=@devices.csv"
+
+# List devices (any role)
+curl http://localhost:5000/api/inventory/devices?workspace_id=default
+
+# KPI dashboard
+curl http://localhost:5000/api/inventory/reports/kpis?workspace_id=default
+```
+
 ## 🚀 Quick Start
 
 ### Prerequisites

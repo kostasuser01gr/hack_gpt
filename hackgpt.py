@@ -917,6 +917,15 @@ class WebDashboard:
 
             logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
 
+        try:
+            from inventory.api import inventory_bp
+
+            self.app.register_blueprint(inventory_bp)
+        except Exception as exc:
+            import logging
+
+            logging.getLogger(__name__).warning("Inventory module unavailable: %s", exc)
+
     def setup_routes(self) -> None:
         """Setup Flask routes."""
 
