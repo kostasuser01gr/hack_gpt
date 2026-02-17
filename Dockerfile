@@ -21,6 +21,7 @@ RUN apt-get update && apt-get full-upgrade -y && apt-get install -y \
     wget \
     sudo \
     jq \
+    zstd \
     dnsutils \
     net-tools \
     iputils-ping \

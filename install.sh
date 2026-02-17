@@ -87,22 +87,24 @@ sudo apt install -y \
     socat \
     proxychains4 || warn "Some additional tools may not be available"
 
-# Install ollama for local AI
+# Install ollama for local AI (non-fatal — optional component)
 echo "[+] Installing ollama for local AI support..."
-curl -fsSL https://ollama.ai/install.sh | sh
+if curl -fsSL https://ollama.ai/install.sh | sh; then
+    # Start ollama service in background and wait for it to be ready
+    echo "[+] Starting ollama service..."
+    ollama serve &
+    OLLAMA_PID=$!
+    sleep 5
 
-# Start ollama service in background and wait for it to be ready
-echo "[+] Starting ollama service..."
-ollama serve &
-OLLAMA_PID=$!
-sleep 5
-
-# Check if ollama is running
-if kill -0 $OLLAMA_PID 2>/dev/null; then
-    echo "[+] Downloading local AI model..."
-    ollama pull llama2:7b || warn "Failed to download AI model - you can do this later with 'ollama pull llama2:7b'"
+    # Check if ollama is running
+    if kill -0 $OLLAMA_PID 2>/dev/null; then
+        echo "[+] Downloading local AI model..."
+        ollama pull llama2:7b || warn "Failed to download AI model - you can do this later with 'ollama pull llama2:7b'"
+    else
+        warn "Ollama service failed to start - you can start it manually with 'ollama serve'"
+    fi
 else
-    warn "Ollama service failed to start - you can start it manually with 'ollama serve'"
+    warn "Ollama installation failed — you can install it later with: curl -fsSL https://ollama.ai/install.sh | sh"
 fi
 
 # Create reports directory
