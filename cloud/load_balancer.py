@@ -3,6 +3,7 @@
 Load Balancer for HackGPT Enterprise
 Distributes traffic across multiple instances for scalability
 """
+
 from __future__ import annotations
 
 import logging

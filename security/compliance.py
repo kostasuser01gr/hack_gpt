@@ -2,6 +2,7 @@
 """Compliance Framework for HackGPT
 Maps findings to various compliance frameworks and generates reports
 """
+
 from __future__ import annotations
 
 import json

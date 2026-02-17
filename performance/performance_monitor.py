@@ -3,6 +3,7 @@
 Performance Monitor for HackGPT Enterprise
 Monitors system and application performance metrics
 """
+
 from __future__ import annotations
 
 import logging

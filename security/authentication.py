@@ -2,6 +2,7 @@
 """Enhanced Security and Authentication System for HackGPT
 Enterprise-grade authentication, RBAC, and audit logging
 """
+
 from __future__ import annotations
 
 import logging

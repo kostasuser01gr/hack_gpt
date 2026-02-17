@@ -2,6 +2,7 @@
 """Advanced AI Engine for HackGPT
 Context-aware analysis with memory and pattern recognition
 """
+
 from __future__ import annotations
 
 import json

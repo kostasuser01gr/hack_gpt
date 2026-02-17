@@ -3,6 +3,7 @@
 Microservice Base Class for HackGPT
 Provides common functionality for all microservices
 """
+
 from __future__ import annotations
 
 import logging
