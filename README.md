@@ -185,6 +185,7 @@ graph TD
 | **kibana** | Log visualization | 5601 | Kibana |
 | **consul** | Service discovery | 8500 | Consul |
 | **nginx** | Load balancer | 80, 443 | Nginx |
+| **hackgpt-kali-mcp** | AI hacking via MCP | 8811 | Kali Linux / FastMCP |
 
 ## 🔧 Configuration
 
@@ -588,6 +589,248 @@ python3 -c "from performance.cache_manager import warm_cache; warm_cache()"
 docker-compose up --scale hackgpt-worker=10
 ```
 
+## � AI-Powered Hacking with Docker & MCP
+
+HackGPT includes a **Kali Linux MCP Server** that turns any MCP-compatible AI
+assistant (Claude Desktop, Codespaces Copilot, etc.) into a full-fledged
+penetration-testing operator — with zero setup on the host.
+
+### How It Works
+
+```
+┌──────────────┐       MCP (HTTP)       ┌──────────────────────┐
+│  Claude AI   │ ◄───────────────────► │  HackGPT             │
+│  (Desktop /  │                       │  MCP Server           │
+│   Codespace) │                       │  (integrated module)  │
+└──────────────┘                       └──────────────────────┘
+                                          │ nmap, nikto, sqlmap
+                                          │ metasploit, hydra …
+```
+
+The MCP server is built into HackGPT — same application, same container.
+Start it from the menu (option **16**), the CLI flag `--mcp`, or via Docker Compose.
+
+### Quick Start
+
+```bash
+# Option A: Run directly (Kali Linux host or container)
+python3 hackgpt_v2.py --mcp
+
+# Option B: Use docker-compose
+docker-compose up -d hackgpt-kali-mcp
+
+# Option C: From the interactive menu → option 16
+python3 hackgpt_v2.py
+```
+
+### Claude Desktop Configuration
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS):
+
+```json
+{
+  "mcpServers": {
+    "hackgpt-kali": {
+      "url": "http://localhost:8811/mcp"
+    }
+  }
+}
+```
+
+### Available MCP Tools
+
+| Tool | Purpose |
+|------|---------|
+| `run_command` | Execute any shell command in Kali |
+| `nmap_scan` | Port scanning & service detection |
+| `nikto_scan` | Web-server vulnerability scanning |
+| `sqlmap_scan` | SQL-injection detection & exploitation |
+| `gobuster_scan` | Directory / DNS brute-forcing |
+| `hydra_attack` | Online password cracking |
+| `metasploit_run` | Metasploit modules |
+| `whatweb_scan` | Web-technology fingerprinting |
+| `whois_lookup` | Domain / IP WHOIS |
+| `hashcat_crack` | Offline hash cracking |
+| `amass_enum` | Subdomain enumeration |
+| `exploit_search` | ExploitDB search |
+
+### Example Prompts
+
+```
+Scan 10.0.0.0/24 for open ports and running services.
+
+Run a Nikto scan against http://testsite.local.
+
+Search ExploitDB for Apache 2.4 vulnerabilities.
+
+Enumerate subdomains of example.com with Amass.
+
+Use Metasploit to check if host 10.0.0.5 is vulnerable to EternalBlue.
+```
+
+> 📖 MCP module source: [`hackgpt_mcp/`](hackgpt_mcp/) | Standalone reference: [`mcp-kali-server/`](mcp-kali-server/)
+
+## 🖥️ Native macOS App
+
+HackGPT ships as a **native Swift/SwiftUI macOS application** optimized for Apple Silicon (M4).
+
+### Install & Launch
+
+```bash
+cd HackGPTApp
+chmod +x build_and_install.sh
+./build_and_install.sh
+```
+
+Then launch from **Finder**, **Launchpad**, or **Spotlight** (Cmd+Space → "HackGPT").
+
+### Auto-Launch Services
+
+When HackGPT opens, it **automatically starts all services**:
+
+| Service | Port | Description |
+|---------|------|-------------|
+| API Backend | 8000 | REST API server |
+| MCP Kali Server | 8811 | Model Context Protocol tools |
+| Web Dashboard | 8080 | Browser-based dashboard |
+| Realtime Dashboard | 5000 | Live monitoring |
+
+All services **shut down automatically** when you quit the app.
+
+### iPhone / iPad
+
+HackGPT also supports iOS in **remote mode** — the iPhone app connects to your Mac's servers over WiFi.
+
+```bash
+# Generate Xcode project for iOS
+cd HackGPTApp && xcodegen generate && open HackGPT.xcodeproj
+```
+
+See [HackGPTApp/IOS_SETUP.md](HackGPTApp/IOS_SETUP.md) for full iOS deployment guide.
+
+## 🛡️ Quality Gates & Autofix
+
+### TL;DR — Automated Safety Net
+
+Every pull request runs **five automated gates** before it can merge:
+
+| Gate | Tool | What it checks |
+|------|------|---------------|
+| **Lint & Format** | ruff | Code style, import ordering, common bugs |
+| **Type Check** | mypy | Type annotation correctness |
+| **Unit Tests** | pytest | Functional correctness across Python 3.9–3.12 |
+| **Security Scan** | bandit + pip-audit | Vulnerable code patterns + dependency CVEs |
+| **CodeQL** | GitHub Code Scanning | Injection, XSS, path traversal, insecure crypto |
+
+All configuration lives in [`pyproject.toml`](pyproject.toml).
+
+### CodeQL Code Scanning
+
+Every PR and weekly schedule runs **GitHub CodeQL** analysis for JavaScript/TypeScript and Python:
+
+- Workflow: [`.github/workflows/codeql.yml`](.github/workflows/codeql.yml)
+- Alerts appear as PR annotations and under Security → Code scanning
+- **Copilot Autofix** suggests patches directly on alerts — always review before merging
+
+#### Enable Default Setup (UI)
+
+1. Go to **Settings → Security → Code security and analysis**
+2. Under **Code scanning** → **CodeQL analysis** → click **Default**
+3. Select languages and enable
+
+#### Enable via CLI
+
+```bash
+gh api -X PUT -H "Accept: application/vnd.github+json" \
+  /repos/<OWNER>/<REPO>/branches/main/protection \
+  -f required_status_checks[strict]=true \
+  -f 'required_status_checks[contexts][]=code-scanning' \
+  -f 'required_status_checks[contexts][]=lint' \
+  -f 'required_status_checks[contexts][]=test' \
+  -f enforce_admins=true \
+  -f restrictions=null -f required_pull_request_reviews=null
+```
+
+### Running Quality Checks Locally
+
+```bash
+# Install tools
+pip install ruff mypy bandit pip-audit pytest pytest-cov
+
+# Lint
+ruff check .
+ruff format --check .
+
+# Type check
+mypy hackgpt.py hackgpt_v2.py --ignore-missing-imports
+
+# Security scan
+bandit -r hackgpt.py hackgpt_v2.py -s B101,B603,B602,B607
+pip-audit -r requirements.txt --desc
+
+# Tests
+pytest tests/ -v
+```
+
+### Input Validation & Rate Limiting
+
+HackGPT now includes built-in protections:
+
+- **Input validation**: Target IPs/domains and scope text are validated against strict patterns and length limits before processing
+- **Rate limiting**: AI API calls are rate-limited to 30 requests per minute per session to prevent abuse and runaway costs
+- **Ethical disclaimers**: The exploitation phase displays a mandatory legal disclaimer requiring explicit confirmation
+
+### Sentry Copilot Extension
+
+1. Install [Sentry for GitHub Copilot](https://github.com/marketplace/sentry-copilot) from the Marketplace
+2. Connect your Sentry project in VS Code/Codespaces
+3. In PRs, use prompts like:
+   - `@sentry What errors occurred in the last 24 hours?`
+   - `@sentry Suggest a minimal fix and generate tests for commit XYZ`
+   - `@sentry Show unresolved issues for this file`
+
+### Docker Copilot
+
+1. Install [Docker for GitHub Copilot](https://github.com/marketplace/docker-for-github-copilot)
+2. Use prompts like:
+   - `@docker Optimize this Dockerfile for production`
+   - `@docker Add healthcheck to my compose services`
+   - `@docker Scan my image for vulnerabilities`
+   - `@docker Convert to multi-stage build`
+
+### Branch Protection (Required Checks)
+
+Set up required status checks before merging:
+
+1. **Settings → Branches → Add rule** → pattern: `main`
+2. Enable **Require status checks to pass**
+3. Add checks: `code-scanning`, `lint`, `test`, `security`
+4. Enable **Require branches to be up to date**
+5. Enable **Enforce for administrators**
+
+### Docker Hardening
+
+The Dockerfile follows security best practices:
+
+- **Multi-stage build**: Builder and runtime stages to minimize attack surface
+- **Non-root user**: Application runs as `hackgpt` user, not root
+- **Health check**: Built-in HTTP health probe against `/api/health`
+- **No cache**: `--no-cache-dir` prevents pip cache from inflating image size
+- **Localhost binding**: `docker-compose.yml` binds all infrastructure ports to `127.0.0.1`
+
+### Org-Wide Reusable Workflow
+
+Place `org/reusable-codeql.yml` in `<OWNER>/.github/.github/workflows/` then call from any repo:
+
+```yaml
+jobs:
+  security:
+    uses: <OWNER>/.github/.github/workflows/reusable-codeql.yml@main
+    secrets: inherit
+```
+
+See [`org/_org_checklist.md`](org/_org_checklist.md) for full org setup guide.
+
 ## 📄 Enterprise License
 
 This project is licensed under the MIT License with additional enterprise terms:
@@ -624,7 +867,7 @@ This project is licensed under the MIT License with additional enterprise terms:
 | **Enterprise Dependencies** | 90+ |
 | **Configuration Options** | 200+ |
 | **Environment Variables** | 100+ |
-| **Docker Services** | 12 |
+| **Docker Services** | 13 |
 | **Supported Compliance Frameworks** | 5 |
 | **Penetration Testing Tools** | 50+ |
 | **API Endpoints** | 25+ |

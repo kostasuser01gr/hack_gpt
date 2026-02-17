@@ -3,3 +3,94 @@
 __pycache__/
 *.pyo
 *.pyd
+*.so
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+*.egg
+.eggs/
+sdist/
+wheels/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Logs
+logs/
+*.log
+
+# Test / coverage
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+coverage.xml
+*.cover
+.hypothesis/
+
+# Backup files
+*.bak
+*.bak.*
+config.ini.bak.*
+hackgpt_v2.py.bak.*
+hackgpt.py.bak.*
+
+# Reports (generated)
+/reports/
+
+# Docker
+docker-compose.override.yml
+
+# Secrets / keys
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+
+# Redis dump
+dump.rdb
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Ruff / lint cache
+.ruff_cache/
+*.db
+hackgpt.db
+HackGPT.app/
+HackGPTApp/HackGPT.app/
+*.xcodeproj/
+.build/
+HackGPTApp/.build/
+HackGPTApp/HackGPT.iconset/

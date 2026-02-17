@@ -1,0 +1,137 @@
+[project]
+name = "hackgpt"
+version = "2.1.0"
+description = "Enterprise AI-Powered Penetration Testing Platform"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+src = [".", "ai_engine", "cloud", "database", "exploitation", "hackgpt_mcp", "performance", "reporting", "security"]
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "S",     # flake8-bandit (security)
+    "A",     # flake8-builtins
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "ISC",   # flake8-implicit-str-concat
+    "PIE",   # flake8-pie
+    "PT",    # flake8-pytest-style
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SIM",   # flake8-simplify
+    "TID",   # flake8-tidy-imports
+    "TCH",   # flake8-type-checking
+    "RUF",   # Ruff-specific rules
+]
+ignore = [
+    "S101",   # assert used — fine in tests
+    "S603",   # subprocess call — pentesting tool by design
+    "S602",   # shell=True — required for pipe/redirect in pentesting commands
+    "S607",   # partial path — tool lookup by name is intentional
+    "S108",   # /tmp usage — acceptable for transient data
+    "S104",   # binding 0.0.0.0 — required for container networking
+    "S110",   # try-except-pass — used for optional dependency detection
+    "S301",   # pickle — used for cache serialization
+    "S311",   # non-crypto random — used for non-security purposes (jitter, IDs)
+    "S324",   # insecure hash — MD5/SHA1 used intentionally for fingerprinting
+    "S501",   # no cert validation — pentesting tool needs this
+    "S605",   # shell string — required for tool invocation
+    "S701",   # jinja2 autoescape — internal dashboard templates
+    "E501",   # line too long — handled by formatter
+    "B008",   # function call in default arg — used by FastAPI/Click
+    "RUF012", # mutable class var — some are intentional
+    "RUF001", # ambiguous unicode in string — intentional special chars
+    "RUF002", # ambiguous unicode in docstring — en-dashes are fine
+    "RUF003", # ambiguous unicode in comment — intentional
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B011"]
+"conftest.py" = ["S"]
+"hackgpt_mcp/*" = ["E402"]  # conditional imports after path setup
+"demo.py" = ["E402"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+check_untyped_defs = true
+disallow_untyped_defs = false          # too strict for initial adoption
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+exclude = [
+    "^\\.venv/",
+    "^build/",
+    "^dist/",
+    "^alpha/",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--cov=.",
+    "--cov-report=term-missing",
+    "--cov-report=xml:coverage.xml",
+    "--cov-config=pyproject.toml",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks integration tests requiring external services",
+    "security: marks security-specific tests",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = [
+    ".venv/*",
+    "tests/*",
+    "conftest.py",
+    "test_installation.py",
+    "alpha/*",
+    "setup.py",
+    "*/migrations/*",
+]
+
+[tool.coverage.report]
+fail_under = 20
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.",
+    "raise NotImplementedError",
+    "pass",
+    "except ImportError",
+]
+
+[tool.bandit]
+exclude_dirs = [".venv", "tests", "alpha"]
+skips = ["B101", "B603", "B602", "B607"]

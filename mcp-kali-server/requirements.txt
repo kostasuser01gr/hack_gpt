@@ -1,0 +1,15 @@
+# HackGPT – Kali Linux MCP Server – Python dependencies
+# =====================================================
+
+# MCP SDK (Model Context Protocol)
+mcp[cli]>=1.2.0
+
+# HTTP / async
+uvicorn>=0.30.0
+httpx>=0.27.0
+starlette>=0.37.0
+anyio>=4.4.0
+
+# Utilities
+pydantic>=2.6.0
+python-dotenv>=1.0.0

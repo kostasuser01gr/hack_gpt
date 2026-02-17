@@ -82,6 +82,13 @@ cvsslib>=1.0.0
 cve>=1.0.1
 cpe>=1.2.1
 
+# MCP (Model Context Protocol) – AI tool server
+mcp[cli]>=1.2.0
+uvicorn>=0.30.0
+httpx>=0.27.0
+starlette>=0.37.0
+anyio>=4.4.0
+
 # Monitoring & Logging
 prometheus-client>=0.18.0
 grafana-api>=1.0.3

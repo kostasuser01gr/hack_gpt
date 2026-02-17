@@ -228,7 +228,31 @@ This security policy is reviewed and updated quarterly to ensure it remains curr
 
 **Last Updated**: August 18, 2025
 **Next Review**: November 18, 2025
-**Version**: 1.0
+**Version**: 1.1
+
+## 🔬 Code Scanning & Copilot Autofix
+
+This repository uses **GitHub Code Scanning (CodeQL)** on every pull request and on a weekly schedule (Monday 3 AM UTC). Alerts appear under the **Security** tab and as PR annotations.
+
+### How It Works
+
+- **On PRs**: CodeQL analyzes JavaScript/TypeScript and Python code for vulnerabilities (injection, XSS, path traversal, insecure crypto, etc.)
+- **Weekly**: A scheduled scan catches any issues that may have been missed or newly discovered
+- **Copilot Autofix**: GitHub Copilot may suggest patches for certain alerts directly on the PR. Always review suggested fixes and run tests before merging — do not rely solely on automated fixes for high-risk changes.
+
+### Scopes
+
+| Language | Paths |
+|----------|-------|
+| JavaScript/TypeScript | `alpha/`, `HackGPTApp/`, root `.js` files |
+| Python | `*.py`, `ai_engine/`, `cloud/`, `database/`, `exploitation/`, `hackgpt_mcp/`, `performance/`, `reporting/`, `security/` |
+| Swift | `HackGPTApp/Sources/` (manual review — not in CodeQL matrix) |
+
+### Required Checks
+
+Before merging any PR, the following status checks must pass:
+- **code-scanning** (CodeQL analysis)
+- **build-and-test** (CI tests)
 
 ## 📞 Contact Information
 

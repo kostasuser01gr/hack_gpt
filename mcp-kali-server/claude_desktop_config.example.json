@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "hackgpt-kali": {
+      "url": "http://localhost:8811/mcp"
+    }
+  }
+}

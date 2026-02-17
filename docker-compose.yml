@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     networks:
       - hackgpt-network
     healthcheck:
@@ -34,7 +34,7 @@ services:
       - redis_data:/data
       - ./redis/redis.conf:/etc/redis/redis.conf:ro
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     networks:
       - hackgpt-network
     healthcheck:
@@ -144,7 +144,7 @@ services:
     container_name: hackgpt-prometheus
     restart: unless-stopped
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -164,9 +164,9 @@ services:
     container_name: hackgpt-grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=hackgpt123
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?Set GRAFANA_ADMIN_PASSWORD in .env}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
@@ -190,8 +190,8 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     ports:
-      - "9200:9200"
-      - "9300:9300"
+      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9300:9300"
     networks:
       - hackgpt-network
 
@@ -203,7 +203,7 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
-      - "5601:5601"
+      - "127.0.0.1:5601:5601"
     networks:
       - hackgpt-network
     depends_on:
@@ -216,8 +216,8 @@ services:
     restart: unless-stopped
     command: agent -server -bootstrap-expect=1 -ui -client=0.0.0.0 -data-dir=/consul/data
     ports:
-      - "8500:8500"
-      - "8600:8600/udp"
+      - "127.0.0.1:8500:8500"
+      - "127.0.0.1:8600:8600/udp"
     volumes:
       - consul_data:/consul/data
     networks:
@@ -248,13 +248,49 @@ services:
     restart: unless-stopped
     command: celery -A performance.parallel_processor flower --port=5555 --broker=redis://:hackgpt123@hackgpt-redis:6379/0
     ports:
-      - "5555:5555"
+      - "127.0.0.1:5555:5555"
     environment:
       - REDIS_URL=redis://:hackgpt123@hackgpt-redis:6379/0
     networks:
       - hackgpt-network
     depends_on:
       - hackgpt-redis
+
+  # ── Kali Linux MCP Server (AI-Powered Hacking) ──
+  # Runs the same HackGPT image with --mcp flag to start the MCP server
+  hackgpt-kali-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hackgpt-kali-mcp
+    restart: "no"  # on-demand: start when needed, stop when done
+    command: ["python3", "hackgpt_v2.py", "--mcp"]
+    ports:
+      - "8811:8811"
+    environment:
+      - MCP_PORT=8811
+      - MCP_COMMAND_TIMEOUT=300
+      - MCP_MAX_OUTPUT_BYTES=524288
+    networks:
+      - hackgpt-network
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8811/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '2.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
 
 volumes:
   postgres_data:

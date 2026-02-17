@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>HackGPT Dashboard</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; }
+        .container { margin: 20px; }
+        .panel { border: 1px solid #0f0; padding: 20px; margin: 10px 0; }
+        button { background: #333; color: #0f0; border: 1px solid #0f0; padding: 10px; }
+        input { background: #333; color: #0f0; border: 1px solid #0f0; padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>HackGPT - AI-Powered Penetration Testing</h1>
+        
+        <div class="panel">
+            <h2>Start Pentest</h2>
+            <input type="text" id="target" placeholder="Target IP/Domain">
+            <input type="text" id="scope" placeholder="Scope">
+            <input type="password" id="auth" placeholder="Authorization Key">
+            <button onclick="startPentest()">Start Full Pentest</button>
+        </div>
+        
+        <div class="panel">
+            <h2>Status</h2>
+            <div id="status">Ready</div>
+        </div>
+    </div>
+    
+    <script>
+        function startPentest() {
+            const target = document.getElementById('target').value;
+            const scope = document.getElementById('scope').value;
+            const auth = document.getElementById('auth').value;
+            
+            fetch('/api/run_pentest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target, scope, auth_key: auth })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('status').innerText = 'Pentest Started';
+            });
+        }
+    </script>
+</body>
+</html>
+        
