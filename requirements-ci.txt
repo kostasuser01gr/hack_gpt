@@ -1,0 +1,43 @@
+# Minimal CI/CD dependencies
+# Only packages needed for linting, type-checking, and running tests.
+# Heavy / system-dependent packages (torch, tensorflow, pyaudio, weasyprint,
+# python-ldap, pypandoc) are excluded to keep CI fast and portable.
+
+# --- Test runner ---
+pytest>=7.4.0
+pytest-cov>=4.1.0
+pytest-asyncio>=0.21.0
+
+# --- Linting & type checking ---
+ruff>=0.9.0
+mypy>=1.6.0
+
+# --- hackgpt.py core (unconditional) ---
+python-dotenv>=1.0.0
+rich>=13.6.0
+openai>=1.3.0
+flask>=3.0.0
+jinja2>=3.1.0
+
+# --- database (sqlalchemy models) ---
+sqlalchemy>=2.0.0
+
+# --- security.authentication ---
+bcrypt>=4.0.0
+PyJWT>=2.8.0
+ldap3>=2.9.0
+
+# --- cloud modules ---
+PyYAML>=6.0.1
+
+# --- performance modules ---
+psutil>=5.9.0
+
+# --- exploitation ---
+requests>=2.31.0
+numpy>=1.24.0
+
+# --- reporting ---
+matplotlib>=3.7.0
+pandas>=2.0.0
+seaborn>=0.12.0

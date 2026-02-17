@@ -45,9 +45,6 @@ load_dotenv()
 # Core imports
 try:
     import openai
-    import pypandoc
-    import pyttsx3
-    import speech_recognition as sr
     from flask import Flask, jsonify, render_template, request
     from rich.console import Console
     from rich.panel import Panel
@@ -57,6 +54,22 @@ except ImportError as e:
     print(f"Missing required package: {e}")
     print("Please run: pip install -r requirements.txt")
     sys.exit(1)
+
+# Optional: voice & document deps (not required for core functionality)
+try:
+    import pypandoc
+except ImportError:
+    pypandoc = None  # type: ignore[assignment]
+
+try:
+    import pyttsx3
+except ImportError:
+    pyttsx3 = None  # type: ignore[assignment]
+
+try:
+    import speech_recognition as sr
+except ImportError:
+    sr = None  # type: ignore[assignment]
 
 # Initialize Rich Console
 console = Console()
@@ -829,6 +842,8 @@ class PentestingPhases:
 
         # Convert to PDF if possible
         try:
+            if pypandoc is None:
+                raise RuntimeError("pypandoc not installed")
             pypandoc.convert_file(
                 str(self.report_dir / "report.md"),
                 "pdf",
@@ -847,6 +862,11 @@ class VoiceInterface:
     """Voice command interface"""
 
     def __init__(self):
+        if sr is None or pyttsx3 is None:
+            raise RuntimeError(
+                "Voice interface requires 'SpeechRecognition' and 'pyttsx3'. "
+                "Install them with: pip install SpeechRecognition pyttsx3 pyaudio"
+            )
         self.recognizer = sr.Recognizer()
         self.microphone = sr.Microphone()
         self.tts_engine = pyttsx3.init()
