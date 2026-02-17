@@ -62,8 +62,8 @@ WORKDIR /hackgpt
 # Copy requirements first for better layer caching
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
+# Install Python dependencies (--ignore-installed avoids conflicts with system packages)
+RUN pip3 install --no-cache-dir --ignore-installed -r requirements.txt --break-system-packages
 
 # ============================================================
 # Stage 2: Runtime image

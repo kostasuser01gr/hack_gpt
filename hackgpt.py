@@ -938,7 +938,10 @@ class HackGPT:
     def __init__(self):
         self.ai_engine = AIEngine()
         self.tool_manager = ToolManager()
-        self.voice_interface = VoiceInterface()
+        try:
+            self.voice_interface = VoiceInterface()
+        except RuntimeError:
+            self.voice_interface = None  # type: ignore[assignment]
         self.console = Console()
         self.web_dashboard = None
 
