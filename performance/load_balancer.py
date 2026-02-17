@@ -12,7 +12,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from threading import Lock, Thread
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 import psutil
 
@@ -26,7 +26,7 @@ class Worker:
     load: int = 0  # Current number of tasks
     max_load: int = 10  # Maximum concurrent tasks
     response_time: float = 0.0
-    last_task: Optional[datetime] = None
+    last_task: datetime | None = None
 
 
 class HealthChecker:
@@ -36,7 +36,7 @@ class HealthChecker:
         self.check_interval = check_interval
         self.logger = logging.getLogger(__name__)
         self.checking = False
-        self.check_thread: Optional[Thread] = None
+        self.check_thread: Thread | None = None
 
     def start_health_checks(self, workers: list[Worker]) -> None:
         """Start health checking"""
@@ -115,7 +115,7 @@ class LoadBalancer:
                     return True
         return False
 
-    def get_best_worker(self, algorithm: str = "least_loaded") -> Optional[Worker]:
+    def get_best_worker(self, algorithm: str = "least_loaded") -> Worker | None:
         """Get the best worker based on algorithm"""
         active_workers = [w for w in self.workers if w.active and w.load < w.max_load]
 
@@ -138,7 +138,7 @@ class LoadBalancer:
             self._current_worker = (self._current_worker + 1) % len(workers)
             return workers[self._current_worker]
 
-    def submit_task(self, func: Callable, *args, **kwargs) -> Optional[Future]:
+    def submit_task(self, func: Callable, *args, **kwargs) -> Future | None:
         """Submit a task to be executed by the best available worker"""
         worker = self.get_best_worker()
 

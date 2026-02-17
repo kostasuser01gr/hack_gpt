@@ -11,7 +11,7 @@ import logging
 import os
 from contextlib import contextmanager
 from datetime import datetime, timezone
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
@@ -110,7 +110,7 @@ class DatabaseManager:
 
             return pentest_session.id
 
-    def get_pentest_session(self, session_id: str) -> Optional[PentestSession]:
+    def get_pentest_session(self, session_id: str) -> PentestSession | None:
         """Get pentest session by ID"""
         with self.get_session() as session:
             result = session.query(PentestSession).filter(PentestSession.id == session_id).first()
@@ -259,7 +259,7 @@ class DatabaseManager:
 
             return user.id
 
-    def get_user_by_username(self, username: str) -> Optional[User]:
+    def get_user_by_username(self, username: str) -> User | None:
         """Get user by username"""
         with self.get_session() as session:
             result = session.query(User).filter(User.username == username).first()

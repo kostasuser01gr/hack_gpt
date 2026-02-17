@@ -11,7 +11,7 @@ import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -31,7 +31,7 @@ class KubernetesResource:
     kind: str
     metadata: dict[str, Any]
     spec: dict[str, Any]
-    status: Optional[dict[str, Any]] = None
+    status: dict[str, Any] | None = None
 
 
 @dataclass
@@ -58,7 +58,7 @@ class ServiceConfig:
 class KubernetesManager:
     """Manages Kubernetes resources for HackGPT microservices"""
 
-    def __init__(self, kubeconfig_path: Optional[str] = None):
+    def __init__(self, kubeconfig_path: str | None = None):
         self.logger = logging.getLogger(__name__)
         self.api_client = None
         self.v1 = None
@@ -342,7 +342,7 @@ class KubernetesManager:
         self,
         name: str,
         rules: list[dict[str, Any]],
-        tls: Optional[list[dict[str, Any]]] = None,
+        tls: list[dict[str, Any]] | None = None,
         namespace: str | None = None,
     ) -> bool:
         """Create a Kubernetes Ingress"""

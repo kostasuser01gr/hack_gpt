@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from threading import Lock, Thread
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -36,7 +36,7 @@ class PerformanceMonitor:
         self.max_metrics = 1000  # Keep only last 1000 metrics
         self._lock = Lock()
         self.monitoring = False
-        self.monitor_thread: Optional[Thread] = None
+        self.monitor_thread: Thread | None = None
 
     def start_monitoring(self) -> None:
         """Start performance monitoring"""

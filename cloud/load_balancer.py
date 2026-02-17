@@ -11,7 +11,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from threading import Lock
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -23,7 +23,7 @@ class BackendInstance:
     weight: int = 1
     active: bool = True
     health_check_url: str = "/health"
-    last_check: Optional[datetime] = None
+    last_check: datetime | None = None
     response_time: float = 0.0
 
 
@@ -52,7 +52,7 @@ class LoadBalancer:
                     return True
         return False
 
-    def get_next_backend(self, algorithm: str = "round_robin") -> Optional[BackendInstance]:
+    def get_next_backend(self, algorithm: str = "round_robin") -> BackendInstance | None:
         """Get the next backend based on the load balancing algorithm"""
         active_backends = [b for b in self.backends if b.active]
 

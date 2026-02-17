@@ -12,7 +12,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Optional
+from typing import Any
 
 try:
     import consul
@@ -37,11 +37,11 @@ class ServiceInstance:
     instance_id: str
     host: str
     port: int
-    health_endpoint: Optional[str] = None
-    metadata: Optional[dict[str, Any]] = None
-    tags: Optional[list[str]] = None
+    health_endpoint: str | None = None
+    metadata: dict[str, Any] | None = None
+    tags: list[str] | None = None
     ttl: int = 30
-    last_heartbeat: Optional[datetime] = None
+    last_heartbeat: datetime | None = None
     status: str = "unknown"  # healthy, unhealthy, unknown
 
 
@@ -51,7 +51,7 @@ class ServiceHealth:
     status: str
     last_check: datetime
     response_time: float
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 class ServiceRegistry:
@@ -146,7 +146,7 @@ class ServiceRegistry:
             self.logger.error(f"Failed to discover services for {service_name}: {e}")
             return []
 
-    def get_service_instance(self, service_name: str, instance_id: str) -> Optional[ServiceInstance]:
+    def get_service_instance(self, service_name: str, instance_id: str) -> ServiceInstance | None:
         """Get a specific service instance"""
         try:
             instances = self.discover_services(service_name, healthy_only=False)
@@ -550,7 +550,7 @@ class ServiceRegistry:
             else:
                 del self.services[service_name]
 
-    def get_load_balancer_target(self, service_name: str, algorithm: str = "round_robin") -> Optional[ServiceInstance]:
+    def get_load_balancer_target(self, service_name: str, algorithm: str = "round_robin") -> ServiceInstance | None:
         """Get a service instance for load balancing"""
         instances = self.discover_services(service_name, healthy_only=True)
         if not instances:

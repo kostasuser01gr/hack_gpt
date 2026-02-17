@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 try:
     from flask import Flask, jsonify, request
@@ -393,9 +393,9 @@ class MicroserviceBase(ABC):
         service_name: str,
         endpoint: str,
         method: str = "GET",
-        data: Optional[dict] = None,
+        data: dict | None = None,
         timeout: int = 30,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Call another microservice"""
         try:
             # Discover service instance

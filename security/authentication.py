@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from functools import wraps
-from typing import Any, Optional
+from typing import Any
 
 import bcrypt
 import jwt
@@ -52,12 +52,12 @@ class Permission(Enum):
 @dataclass
 class AuthResult:
     success: bool
-    user_id: Optional[str]
-    username: Optional[str]
-    role: Optional[str]
+    user_id: str | None
+    username: str | None
+    role: str | None
     permissions: list[str]
-    token: Optional[str]
-    error_message: Optional[str]
+    token: str | None
+    error_message: str | None
 
 
 class RoleBasedAccessControl:

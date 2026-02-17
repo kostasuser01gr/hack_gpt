@@ -10,7 +10,7 @@ import os
 import subprocess
 import tempfile
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -31,12 +31,12 @@ class ContainerConfig:
     ports: dict[str, int]
     volumes: dict[str, str]
     environment: dict[str, str]
-    command: Optional[str] = None
-    working_dir: Optional[str] = None
-    network: Optional[str] = None
+    command: str | None = None
+    working_dir: str | None = None
+    network: str | None = None
     restart_policy: str = "unless-stopped"
-    memory_limit: Optional[str] = None
-    cpu_limit: Optional[float] = None
+    memory_limit: str | None = None
+    cpu_limit: float | None = None
 
 
 @dataclass
@@ -84,8 +84,8 @@ class DockerManager:
         self,
         dockerfile_path: str,
         image_name: str,
-        build_args: Optional[dict[str, str]] = None,
-        context_path: Optional[str] = None,
+        build_args: dict[str, str] | None = None,
+        context_path: str | None = None,
     ) -> bool:
         """Build a Docker image from Dockerfile"""
         if not self.is_docker_available():

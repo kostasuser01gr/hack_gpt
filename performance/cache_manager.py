@@ -16,7 +16,7 @@ import weakref
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 try:
     import redis
@@ -56,9 +56,9 @@ class CacheEntry:
     key: str
     value: Any
     created_at: datetime
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
     access_count: int = 0
-    last_accessed: Optional[datetime] = None
+    last_accessed: datetime | None = None
     size_bytes: int = 0
 
     def is_expired(self) -> bool:
@@ -77,7 +77,7 @@ class CacheBackend(ABC):
         pass
 
     @abstractmethod
-    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl: int | None = None) -> bool:
         pass
 
     @abstractmethod
@@ -130,7 +130,7 @@ class MemoryCache(CacheBackend):
             self.stats.hits += 1
             return entry.value
 
-    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl: int | None = None) -> bool:
         try:
             with self.lock:
                 # Calculate expiry time
@@ -239,10 +239,10 @@ class RedisCache(CacheBackend):
         host: str = "localhost",
         port: int = 6379,
         db: int = 0,
-        password: Optional[str] = None,
+        password: str | None = None,
         prefix: str = "hackgpt:",
         default_ttl: int = 3600,
-        sentinel_hosts: Optional[list[tuple]] = None,
+        sentinel_hosts: list[tuple] | None = None,
         sentinel_service: str = "mymaster",
     ):
 
@@ -299,7 +299,7 @@ class RedisCache(CacheBackend):
             self.stats.misses += 1
             return None
 
-    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl: int | None = None) -> bool:
         try:
             redis_key = self._make_key(key)
             data = pickle.dumps(value)
@@ -364,8 +364,8 @@ class CacheManager:
 
     def __init__(
         self,
-        l1_cache: Optional[CacheBackend] = None,
-        l2_cache: Optional[CacheBackend] = None,
+        l1_cache: CacheBackend | None = None,
+        l2_cache: CacheBackend | None = None,
         l1_ttl: int = 300,  # 5 minutes
         l2_ttl: int = 3600,
     ):  # 1 hour
@@ -400,8 +400,8 @@ class CacheManager:
         self,
         key: str,
         value: Any,
-        l1_ttl: Optional[int] = None,
-        l2_ttl: Optional[int] = None,
+        l1_ttl: int | None = None,
+        l2_ttl: int | None = None,
     ) -> bool:
         """Set value in both cache layers"""
         l1_success = self.l1_cache.set(key, value, l1_ttl or self.l1_ttl)
@@ -445,7 +445,7 @@ class CacheManager:
 
         return stats
 
-    def cache_result(self, ttl: Optional[int] = None, key_func: Optional[Callable] = None):
+    def cache_result(self, ttl: int | None = None, key_func: Callable | None = None):
         """Decorator for caching function results"""
 
         def decorator(func):
@@ -470,7 +470,7 @@ class CacheManager:
 
         return decorator
 
-    def memoize(self, ttl: Optional[int] = None):
+    def memoize(self, ttl: int | None = None):
         """Decorator for memoizing function results"""
 
         def decorator(func):

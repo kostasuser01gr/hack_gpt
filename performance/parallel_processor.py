@@ -20,7 +20,7 @@ from concurrent.futures import (
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any, Callable
 
 try:
     from celery import Celery
@@ -57,14 +57,14 @@ class Task:
     priority: int = 0
     max_retries: int = 3
     retry_count: int = 0
-    timeout: Optional[int] = None
-    created_at: Optional[datetime] = None
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
+    timeout: int | None = None
+    created_at: datetime | None = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
     status: TaskStatus = TaskStatus.PENDING
     result: Any = None
-    error: Optional[str] = None
-    worker_id: Optional[str] = None
+    error: str | None = None
+    worker_id: str | None = None
 
     def __post_init__(self):
         if self.created_at is None:
@@ -77,8 +77,8 @@ class WorkerStats:
     started_at: datetime
     tasks_completed: int = 0
     tasks_failed: int = 0
-    current_task: Optional[str] = None
-    last_heartbeat: Optional[datetime] = None
+    current_task: str | None = None
+    last_heartbeat: datetime | None = None
     status: str = "idle"  # idle, busy, stopped
 
 
@@ -91,7 +91,7 @@ class TaskQueue:
         self.lock = threading.RLock()
         self.logger = logging.getLogger(__name__)
 
-    def put(self, task: Task, block: bool = True, timeout: Optional[float] = None):
+    def put(self, task: Task, block: bool = True, timeout: float | None = None):
         """Add task to queue"""
         with self.lock:
             # Priority queue uses (priority, item) tuples
@@ -107,7 +107,7 @@ class TaskQueue:
 
         self.logger.debug(f"Added task {task.task_id} to queue")
 
-    def get(self, block: bool = True, timeout: Optional[float] = None) -> Task:
+    def get(self, block: bool = True, timeout: float | None = None) -> Task:
         """Get next task from queue"""
         try:
             priority_item = self.queue.get(block=block, timeout=timeout)
@@ -126,7 +126,7 @@ class TaskQueue:
         """Mark task as done"""
         self.queue.task_done()
 
-    def get_task(self, task_id: str) -> Optional[Task]:
+    def get_task(self, task_id: str) -> Task | None:
         """Get task by ID"""
         with self.lock:
             return self.tasks.get(task_id)
@@ -334,7 +334,7 @@ class ParallelProcessor:
         *args,
         priority: int = 0,
         max_retries: int = 3,
-        timeout: Optional[int] = None,
+        timeout: int | None = None,
         **kwargs,
     ) -> str:
         """Submit a task for execution"""
@@ -363,7 +363,7 @@ class ParallelProcessor:
         self.logger.info(f"Submitted task {task_id}: {function_name}")
         return task_id
 
-    def get_task_result(self, task_id: str, timeout: Optional[float] = None) -> Any:
+    def get_task_result(self, task_id: str, timeout: float | None = None) -> Any:
         """Get task result (blocking)"""
         if self.use_celery:
             # Get result from Celery
@@ -388,7 +388,7 @@ class ParallelProcessor:
 
             time.sleep(0.1)
 
-    def get_task_status(self, task_id: str) -> Optional[dict[str, Any]]:
+    def get_task_status(self, task_id: str) -> dict[str, Any] | None:
         """Get task status"""
         if self.use_celery:
             if self.celery_app is None:
