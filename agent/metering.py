@@ -7,10 +7,11 @@ import threading
 import time
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from agent.config import AgentLimits
-from agent.schemas import UsageRecord
+if TYPE_CHECKING:
+    from agent.config import AgentLimits
+    from agent.schemas import UsageRecord
 
 logger = logging.getLogger(__name__)
 

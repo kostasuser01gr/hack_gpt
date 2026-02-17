@@ -101,8 +101,11 @@ class TestSchemas:
         from agent.schemas import UsageRecord
 
         rec = UsageRecord(
-            user_id="u1", model="gpt-4o", input_tokens=100,
-            output_tokens=50, total_tokens=150,
+            user_id="u1",
+            model="gpt-4o",
+            input_tokens=100,
+            output_tokens=50,
+            total_tokens=150,
         )
         d = rec.to_dict()
         assert d["user_id"] == "u1"
@@ -117,8 +120,12 @@ class TestMetering:
 
         meter = UsageMeter(AgentLimits(max_requests_per_minute=100, max_requests_per_day=1000))
         rec = UsageRecord(
-            user_id="u1", model="gpt-4o", input_tokens=100,
-            output_tokens=50, total_tokens=150, estimated_cost_usd=0.001,
+            user_id="u1",
+            model="gpt-4o",
+            input_tokens=100,
+            output_tokens=50,
+            total_tokens=150,
+            estimated_cost_usd=0.001,
         )
         meter.record_usage(rec)
         usage = meter.get_user_usage("u1")
@@ -304,10 +311,8 @@ class TestOrchestrator:
         from agent.orchestrator import AgentOrchestrator
 
         cfg = AgentConfig()
-        with patch("agent.orchestrator.OpenAIClient"), \
-             patch("agent.orchestrator.UsageMeter"):
-            orch = AgentOrchestrator(cfg)
-        return orch
+        with patch("agent.orchestrator.OpenAIClient"), patch("agent.orchestrator.UsageMeter"):
+            return AgentOrchestrator(cfg)
 
     def test_list_conversations_empty(self):
         orch = self._make_orchestrator()
@@ -367,10 +372,11 @@ class TestOrchestrator:
 
 
 class TestAgentAPI:
-    @pytest.fixture()
+    @pytest.fixture
     def client(self):
-        import agent.api as api_module
         from flask import Flask
+
+        import agent.api as api_module
         from agent.api import agent_bp
 
         app = Flask(__name__)
@@ -407,8 +413,10 @@ class TestAgentAPI:
     @patch("agent.api._get_orchestrator")
     def test_usage_endpoint(self, mock_orch, client):
         mock_orch.return_value.meter.get_user_usage.return_value = {
-            "daily_requests": 5, "daily_tokens": 1000,
-            "daily_cost_usd": 0.01, "total_requests": 10,
+            "daily_requests": 5,
+            "daily_tokens": 1000,
+            "daily_cost_usd": 0.01,
+            "total_requests": 10,
         }
         resp = client.get("/api/agent/usage", headers={"X-User-ID": "u1"})
         assert resp.status_code == 200
@@ -416,13 +424,17 @@ class TestAgentAPI:
 
     def test_chat_missing_message(self, client):
         resp = client.post(
-            "/api/agent/chat", json={}, headers={"X-User-ID": "u1"},
+            "/api/agent/chat",
+            json={},
+            headers={"X-User-ID": "u1"},
         )
         assert resp.status_code == 400
 
     def test_chat_stream_missing_message(self, client):
         resp = client.post(
-            "/api/agent/chat/stream", json={}, headers={"X-User-ID": "u1"},
+            "/api/agent/chat/stream",
+            json={},
+            headers={"X-User-ID": "u1"},
         )
         assert resp.status_code == 400
 

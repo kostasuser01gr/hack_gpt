@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from agent.config import AgentConfig
+if TYPE_CHECKING:
+    from agent.config import AgentConfig
 
 
 def build_tool_list(config: AgentConfig, *, overrides: dict[str, bool] | None = None) -> list[dict[str, Any]]:

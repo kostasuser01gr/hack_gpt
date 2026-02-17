@@ -11,11 +11,14 @@ from __future__ import annotations
 
 import logging
 import time
-from collections.abc import Generator
 from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from agent.config import AgentConfig
+if TYPE_CHECKING:
+    from collections.abc import Generator
+
+    from agent.config import AgentConfig
+
 from agent.metering import UsageMeter
 from agent.openai_client import OpenAIClient
 from agent.schemas import (

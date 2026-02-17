@@ -5,11 +5,13 @@ from __future__ import annotations
 import logging
 import os
 import tempfile
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from agent.config import AgentConfig
-from agent.openai_client import OpenAIClient
 from agent.schemas import Workspace
+
+if TYPE_CHECKING:
+    from agent.config import AgentConfig
+    from agent.openai_client import OpenAIClient
 
 logger = logging.getLogger(__name__)
 

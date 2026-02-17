@@ -6,11 +6,12 @@ Uses the Responses API as the primary interface for tool-calling and streaming.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import openai
 
-from agent.config import AgentConfig
+if TYPE_CHECKING:
+    from agent.config import AgentConfig
 
 logger = logging.getLogger(__name__)
 

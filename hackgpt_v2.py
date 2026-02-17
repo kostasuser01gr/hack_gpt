@@ -855,7 +855,7 @@ class EnterpriseHackGPT:
             from agent.api import agent_bp
 
             app.register_blueprint(agent_bp)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             import logging as _logging
 
             _logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
@@ -1193,7 +1193,7 @@ class EnterpriseWebDashboard:
             from agent.api import agent_bp
 
             app.register_blueprint(agent_bp)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             import logging
 
             logging.getLogger(__name__).warning("Agent Mode unavailable: %s", exc)
