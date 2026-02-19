@@ -14,7 +14,7 @@
 <body>
     <div class="container">
         <h1>HackGPT - AI-Powered Penetration Testing</h1>
-        
+
         <div class="panel">
             <h2>Start Pentest</h2>
             <input type="text" id="target" placeholder="Target IP/Domain">
@@ -22,19 +22,19 @@
             <input type="password" id="auth" placeholder="Authorization Key">
             <button onclick="startPentest()">Start Full Pentest</button>
         </div>
-        
+
         <div class="panel">
             <h2>Status</h2>
             <div id="status">Ready</div>
         </div>
     </div>
-    
+
     <script>
         function startPentest() {
             const target = document.getElementById('target').value;
             const scope = document.getElementById('scope').value;
             const auth = document.getElementById('auth').value;
-            
+
             fetch('/api/run_pentest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
